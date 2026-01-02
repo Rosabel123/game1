@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>真心话大冒险随机抽奖</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #fff;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            padding: 20px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .game-area {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+        
+        .table-container {
+            width: 400px;
+            height: 400px;
+            position: relative;
+            border-radius: 15px;
+            border: 3px solid #ffcc00;
+            background: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+        
+        .table-roll {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        .table-row {
+            position: absolute;
+            width: 100%;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            left: 0;
+        }
+        
+        .table-row:nth-child(odd) {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .table-row:nth-child(even) {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .table-row.highlight {
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+            color: white;
+            font-size: 18px;
+            box-shadow: 0 0 20px rgba(255, 65, 108, 0.5);
+            z-index: 2;
+            height: 60px;
+            transform: scale(1.05);
+        }
+        
+        .row-number {
+            width: 30px;
+            text-align: center;
+            margin-right: 15px;
+            color: #ffcc00;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .row-content {
+            flex: 1;
+            text-align: left;
+        }
+        
+        .result-area {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .result-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #ffcc00;
+        }
+        
+        .result-box {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 15px;
+            padding: 25px;
+            width: 100%;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #ffcc00;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+        }
+        
+        .result-text {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ffcc00;
+            text-align: center;
+            line-height: 1.4;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .spin-button {
+            background: linear-gradient(to bottom, #ff416c, #ff4b2b);
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 6px 0 #b31e1e, 0 10px 20px rgba(0, 0, 0, 0.3);
+            margin-top: 20px;
+        }
+        
+        .spin-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 #b31e1e, 0 12px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .spin-button:active {
+            transform: translateY(2px);
+            box-shadow: 0 4px 0 #b31e1e, 0 6px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .spin-button:disabled {
+            background: linear-gradient(to bottom, #888, #666);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 6px 0 #555, 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .history-title {
+            font-size: 1.3rem;
+            margin-top: 30px;
+            margin-bottom: 10px;
+            color: #ffcc00;
+        }
+        
+        .history-box {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 15px;
+            width: 100%;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .history-item {
+            padding: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 1rem;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        .instructions {
+            margin-top: 30px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-align: left;
+            max-width: 600px;
+        }
+        
+        @media (max-width: 768px) {
+            .game-area {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .table-container {
+                width: 320px;
+                height: 320px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .result-text {
+                font-size: 1.5rem;
+            }
+            
+            .table-row {
+                height: 32px;
+                font-size: 14px;
+            }
+            
+            .table-row.highlight {
+                height: 48px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>真心话大冒险随机抽奖</h1>
+        <p class="subtitle">点击开始按钮，高亮会顺序滚动并随机停止！</p>
+        
+        <div class="game-area">
+            <div class="table-container">
+                <div class="table-roll" id="tableRoll">
+                    <!-- 表格行将通过JavaScript动态生成 -->
+                </div>
+            </div>
+            
+            <div class="result-area">
+                <h2 class="result-title">本轮结果</h2>
+                <div class="result-box">
+                    <div class="result-text" id="result">等待开始...</div>
+                </div>
+                
+                <button class="spin-button" id="spinBtn">开始随机</button>
+                
+                <h3 class="history-title">历史记录</h3>
+                <div class="history-box" id="history">
+                    <!-- 历史记录将通过JavaScript动态添加 -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <p><strong>游戏说明：</strong></p>
+            <p>1. 点击"开始随机"按钮，高亮会从第1行开始顺序向下滚动</p>
+            <p>2. 滚动一段时间后，会在1-10行之间随机停止</p>
+            <p>3. 停止后高亮显示的行即为本轮挑战</p>
+            <p>4. 游戏历史记录会保存在当前浏览器中</p>
+        </div>
+    </div>
+
+    <script>
+        // 挑战选项
+        const options = [
+            "真心话：说出你最近一次撒谎的内容",
+            "大冒险：给通讯录里第10个人打电话说我想你了",
+            "真心话：你暗恋过谁？为什么喜欢TA？",
+            "大冒险：原地转10圈然后走直线",
+            "真心话：你做过最尴尬的事是什么？",
+            "大冒险：用怪声调唱一首歌",
+            "真心话：你最想改变自己身上的哪个缺点？",
+            "大冒险：模仿一位名人直到有人猜出是谁",
+            "真心话：如果你有超能力，你最想做什么？",
+            "大冒险：向在场的一个人表白，持续30秒"
+        ];
+        
+        // 初始化变量
+        let isRolling = false;
+        let rollInterval = null;
+        let currentIndex = 0;
+        let spinHistory = JSON.parse(localStorage.getItem('spinHistory')) || [];
+        let rollSpeed = 100; // 初始滚动速度（毫秒）
+        let targetStopIndex = -1; // 目标停止位置
+        let rollCount = 0; // 滚动次数
+        
+        // DOM元素
+        const tableRoll = document.getElementById('tableRoll');
+        const spinBtn = document.getElementById('spinBtn');
+        const resultElement = document.getElementById('result');
+        const historyElement = document.getElementById('history');
+        
+        // 初始化表格
+        function initTable() {
+            tableRoll.innerHTML = '';
+            
+            const rowHeight = 40;
+            const containerHeight = 400;
+            
+            // 创建10个表格行
+            options.forEach((option, index) => {
+                const row = document.createElement('div');
+                row.className = 'table-row';
+                row.id = `row-${index}`;
+                
+                // 计算行位置（垂直居中排列）
+                const top = (containerHeight - rowHeight * options.length) / 2 + index * rowHeight;
+                row.style.top = `${top}px`;
+                
+                row.innerHTML = `
+                    <div class="row-number">${index + 1}</div>
+                    <div class="row-content">${option}</div>
+                `;
+                
+                tableRoll.appendChild(row);
+            });
+            
+            // 默认高亮第一行
+            highlightRow(0);
+            
+            // 加载历史记录
+            updateHistory();
+            
+            // 显示欢迎信息
+            setTimeout(() => {
+                if (spinHistory.length === 0) {
+                    resultElement.innerHTML = "准备好挑战了吗？<br>点击按钮开始随机抽奖！";
+                }
+            }, 500);
+        }
+        
+        // 高亮指定行
+        function highlightRow(index) {
+            // 移除所有高亮
+            document.querySelectorAll('.table-row').forEach(row => {
+                row.classList.remove('highlight');
+            });
+            
+            // 高亮指定行
+            const row = document.getElementById(`row-${index}`);
+            if (row) {
+                row.classList.add('highlight');
+                currentIndex = index;
+            }
+        }
+        
+        // 移动到下一行（顺序滚动）
+        function moveToNextRow() {
+            currentIndex = (currentIndex + 1) % options.length; // 1→2→3...→10→1
+            highlightRow(currentIndex);
+            rollCount++;
+        }
+        
+        // 开始顺序滚动，最后随机停止
+        function startRoll() {
+            if (isRolling) return;
+            
+            isRolling = true;
+            spinBtn.disabled = true;
+            spinBtn.textContent = "随机选择中...";
+            resultElement.textContent = "顺序滚动中...";
+            
+            // 重置变量
+            rollSpeed = 100;
+            rollCount = 0;
+            currentIndex = 0;
+            highlightRow(0);
+            
+            // 随机决定停止位置（0-9）
+            targetStopIndex = Math.floor(Math.random() * options.length);
+            
+            // 计算总滚动次数（确保有足够多的循环看起来自然）
+            // 至少滚动3圈（30次）+ 随机额外滚动（0-20次）
+            const minRolls = options.length * 3; // 至少3圈
+            const extraRolls = Math.floor(Math.random() * 20); // 额外0-19次滚动
+            const totalRolls = minRolls + extraRolls + targetStopIndex;
+            
+            console.log(`将停止在第 ${targetStopIndex + 1} 行，总共滚动 ${totalRolls} 次`);
+            
+            // 开始顺序滚动
+            rollInterval = setInterval(() => {
+                moveToNextRow();
+                
+                // 逐渐加速
+                if (rollSpeed > 50 && rollCount < totalRolls * 0.3) {
+                    rollSpeed *= 0.98;
+                    clearInterval(rollInterval);
+                    rollInterval = setInterval(() => {
+                        moveToNextRow();
+                        
+                        // 检查是否到达目标滚动次数
+                        if (rollCount >= totalRolls) {
+                            stopRoll();
+                        }
+                    }, rollSpeed);
+                }
+                
+                // 最后阶段开始减速
+                if (rollCount >= totalRolls * 0.7 && rollSpeed < 200) {
+                    rollSpeed *= 1.02;
+                    clearInterval(rollInterval);
+                    rollInterval = setInterval(() => {
+                        moveToNextRow();
+                        
+                        // 检查是否到达目标滚动次数
+                        if (rollCount >= totalRolls) {
+                            stopRoll();
+                        }
+                    }, rollSpeed);
+                }
+                
+            }, rollSpeed);
+        }
+        
+        // 停止滚动
+        function stopRoll() {
+            if (!isRolling) return;
+            
+            clearInterval(rollInterval);
+            
+            // 确保停在目标位置
+            if (currentIndex !== targetStopIndex) {
+                // 如果还没到目标位置，继续滚动直到到达
+                const checkInterval = setInterval(() => {
+                    moveToNextRow();
+                    if (currentIndex === targetStopIndex) {
+                        clearInterval(checkInterval);
+                        finishRoll();
+                    }
+                }, 150);
+            } else {
+                finishRoll();
+            }
+        }
+        
+        // 完成滚动，显示结果
+        function finishRoll() {
+            // 显示最终结果
+            const selectedOption = options[targetStopIndex];
+            resultElement.textContent = selectedOption;
+            
+            // 添加选中动画
+            const selectedRow = document.getElementById(`row-${targetStopIndex}`);
+            if (selectedRow) {
+                selectedRow.style.animation = 'selectPulse 1s ease-in-out';
+                setTimeout(() => {
+                    selectedRow.style.animation = '';
+                }, 1000);
+            }
+            
+            // 保存到历史记录
+            const historyItem = {
+                option: selectedOption,
+                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            };
+            
+            spinHistory.unshift(historyItem);
+            if (spinHistory.length > 10) spinHistory = spinHistory.slice(0, 10);
+            
+            // 保存到本地存储
+            localStorage.setItem('spinHistory', JSON.stringify(spinHistory));
+            
+            // 更新历史记录显示
+            updateHistory();
+            
+            // 重置状态
+            setTimeout(() => {
+                isRolling = false;
+                spinBtn.disabled = false;
+                spinBtn.textContent = "开始随机";
+            }, 1000);
+        }
+        
+        // 更新历史记录显示
+        function updateHistory() {
+            historyElement.innerHTML = '';
+            
+            if (spinHistory.length === 0) {
+                const emptyMsg = document.createElement('div');
+                emptyMsg.className = 'history-item';
+                emptyMsg.textContent = '暂无记录，开始随机抽奖吧！';
+                historyElement.appendChild(emptyMsg);
+                return;
+            }
+            
+            spinHistory.forEach((item, index) => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                
+                // 给最新记录添加高亮
+                if (index === 0) {
+                    historyItem.style.backgroundColor = 'rgba(255, 204, 0, 0.2)';
+                    historyItem.style.borderLeft = '3px solid #ffcc00';
+                    historyItem.style.paddingLeft = '10px';
+                }
+                
+                historyItem.innerHTML = `
+                    <div style="display: flex; justify-content: space-between;">
+                        <span><strong>${item.time}</strong></span>
+                        <span style="color: #ffcc00; font-size: 0.9em;">${index === 0 ? '最新' : ''}</span>
+                    </div>
+                    <div style="margin-top: 5px;">${item.option}</div>
+                `;
+                historyElement.appendChild(historyItem);
+            });
+        }
+        
+        // 清空历史记录
+        function clearHistory() {
+            if (confirm('确定要清空所有历史记录吗？')) {
+                spinHistory = [];
+                localStorage.removeItem('spinHistory');
+                updateHistory();
+                resultElement.textContent = "历史记录已清空";
+                highlightRow(0);
+            }
+        }
+        
+        // 事件监听
+        spinBtn.addEventListener('click', startRoll);
+        
+        // 添加键盘支持（空格键开始）
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && !isRolling) {
+                e.preventDefault();
+                startRoll();
+            }
+        });
+        
+        // 添加清空历史按钮
+        document.addEventListener('DOMContentLoaded', function() {
+            const clearBtn = document.createElement('button');
+            clearBtn.textContent = '清空历史';
+            clearBtn.style.cssText = `
+                background: rgba(255, 255, 255, 0.1);
+                color: #ffcc00;
+                border: 1px solid #ffcc00;
+                padding: 8px 16px;
+                border-radius: 20px;
+                cursor: pointer;
+                margin-top: 10px;
+                font-size: 0.9em;
+                transition: all 0.3s;
+            `;
+            clearBtn.addEventListener('mouseover', () => {
+                clearBtn.style.background = 'rgba(255, 204, 0, 0.2)';
+            });
+            clearBtn.addEventListener('mouseout', () => {
+                clearBtn.style.background = 'rgba(255, 255, 255, 0.1)';
+            });
+            clearBtn.addEventListener('click', clearHistory);
+            
+            // 将清空按钮添加到历史记录区域
+            const historyContainer = historyElement.parentElement;
+            historyContainer.appendChild(clearBtn);
+        });
+        
+        // 页面加载时初始化表格
+        window.addEventListener('DOMContentLoaded', initTable);
+        
+        // 添加CSS动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes selectPulse {
+                0% { transform: scale(1.05); box-shadow: 0 0 10px rgba(255, 65, 108, 0.5); }
+                50% { transform: scale(1.1); box-shadow: 0 0 40px rgba(255, 65, 108, 0.9); }
+                100% { transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 65, 108, 0.5); }
+            }
+            
+            .history-item {
+                transition: background-color 0.3s ease;
+            }
+            
+            .history-item:hover {
+                background-color: rgba(255, 255, 255, 0.1) !important;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
